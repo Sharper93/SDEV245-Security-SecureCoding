@@ -1,0 +1,52 @@
+"""
+Module 2 - Encrypt Decrypt Demo ReadME
+
+---
+
+Symmetric Encryption Demo with Python (Fernet)
+
+File Symmetric.py demonstrates symmetric encryption and decryption in Python using the cryptography library’s Fernet module.
+
+It generates a secure key, saves it to a file, encrypts a message, and then decrypts it back to its original form.
+
+SYM.key – Binary file containing the generated symmetric key.
+
+How It Works
+
+1. Key Generation  
+   The script uses `Fernet.generate_key()` to create a secure symmetric key and writes it to `SYM.key`.
+
+2. Key Loading  
+   The `load_key()` function reads the key from `SYM.key`.
+
+3. Message Encryption  
+   The message `"Sammi's secret message for secure coding class!"` is encoded to bytes and encrypted using the Fernet key.
+
+4. Message Decryption  
+   The encrypted token is decrypted back to the original message.
+
+---
+
+Asymmetric Encryption Demo with Python (RSA)
+
+File asymmetric.py demonstrates asymmetric encryption and decryption in Python using RSA library. 
+
+It generates a public/private key pair encrypts a message with the public key, and then decrypts its original form using the private key. 
+
+publicKey/privateKey - RSA key pair generated in memory when the script runs. 
+
+How It Works
+
+1. Key Generation  
+   The script uses `rsa.newkeys(1024)` to generate a public key and private key. The 1024 parm specifies the key size in bits. 
+
+2. Message Encryption
+   The message `"Sammi's message for encryption and decryption using asymmetric kets"` is encoded in bytes and encrypted using the public key with rsa.encrypt(). 
+
+3. Message Decryption  
+   The encrypted data is decrypted using the private key with rsa.decrypt(), and then decoded back into a readable string. 
+
+"""
+
+
+
