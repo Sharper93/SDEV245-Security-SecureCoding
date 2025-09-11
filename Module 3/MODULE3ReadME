@@ -1,0 +1,23 @@
+"""
+Secure Hashing and Encryption Assignment
+Samantha Harper
+09/10/2025
+
+This Python Application provides a simple command-line interface for performing secure hashing. 
+Caesar cipher encryption/decryption and digital signature operations using open SSL. 
+It also includes RBAC for user authentication. 
+
+Features: 
+- SHA-256 Hashing
+- Caesar Cipher
+- Digital Signatures (OpenSSL)
+- User Authentication
+
+Requirements:
+- hashlib, getpass, subprocess, sys, os, shutil, pathlib
+
+NOTES: 
+- Only users with the 'admin' role can generate RSA Keys. 
+- Make sure OpenSSL is installed and available in your system;s PATH
+
+"""
