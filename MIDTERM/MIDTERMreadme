@@ -1,0 +1,18 @@
+"""
+
+CIA Triad Explanation
+- Confidentiality: We use AES-256 bit key which makes it unreadable to unauthorized users. This meaning even if the message is intercepted, the person cannot decrypt it without the key and nonce. 
+- Integrity: By hashing the message with SHA-256 before and after encryption/decription, we ensure it wasn't altered. 
+- Availabllity: Script can be run anytime locally, ensuring data is accessable when needed. 
+
+
+Entropy & Key Generation
+Entrohpy: 
+ - Strong randomness is crucial for secure keys and numbers used only once. We use os. urandom() and the cryptography library's secure key generation to ensure high entropy. 
+ - Prevents prefictable keys, which could be exploited by attacker. 
+Key Generation:
+ - AES key generated using AESGCM.generate_key(bit_length=256), which ensures a securely random 256-bit key. 
+ - This key must be securely stored or shared to maintain confidentiality. 
+
+
+"""
