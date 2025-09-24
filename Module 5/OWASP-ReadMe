@@ -1,0 +1,210 @@
+
+OWASP Top Ten Code Fix
+Samantha Harper
+09/24/2025
+
+This document shows 10 vulnerabilities scripts, OWASP Guideance, why they are vulnerable, 
+and how the secure code fix addresses the vulnerabilities. 
+
+--------------------------------------------------------------------------------------------------------------
+
+BROKEN ACCESS CONTROL
+
+OWASP Guideance: 
+- Deny by Default
+- Implement role-based access checks
+- Use server-side Authorization Logic
+
+NUMBER 1 
+
+VULNERABILITY - anyone can access any users profile by changing the userId in the url. There is no check to
+ensure the request is authorized. 
+
+app.get('/profile/:userId', (req, res) => {
+    User.findById(req.params.userId, (err, user) => {
+        if (err) return res.status(500).send(err);
+        res.json(user);
+    });
+}); 
+
+SECURE VERSION --> This version adds in authenticateUser middleware and checks if the authenticated users 
+ID matchs the requested profile -- preventing unauthorized access.
+
+
+NUMBER 2
+
+VULNERABILITY - Any user can access any account by modifying user_id in the URL. No Authentication or authroization check. 
+
+@app.route('/account/<user_id>')
+def get_account(user_id):
+    user = db.query(User).filter_by(id=user_id).first()
+    return jsonify(user.to_dict())
+
+
+SECURE VERSION --> Uses login_required and checks the the current_user matches the requested user)id.. this prevents horizontal privilege escalation.
+
+------------------------------------------------------------------------------------------------------------------
+
+Cryptographic Failures
+
+OWASP Guideance: 
+- Use strong adaptive hashing algorithms like bcrypt, scrypt, or Argon2
+- Always salt passwords
+- Use secure key management practices
+
+NUMBER 3
+
+VULNERABILITY - Uses MDS which is outdated and vulnerable to collision attacks
+
+public String hashPassword(String password) throws NoSuchAlgorithmException {
+    MessageDigest md = MessageDigest.getInstance("MD5");
+    md.update(password.getBytes());
+    byte[] digest = md.digest();
+    return DatatypeConverter.printHexBinary(digest);
+}
+
+SECURE VERSION --> Replaces MDS with BCrypt a modern password hashing algroithim that includes salting
+and is resistant to brute-force attacks. 
+
+
+NUMBER 4
+
+VULNERABILITY - Uses SHA-1 which is deprecated due to collision vulnerabilities. 
+
+import hashlib
+
+def hash_password(password):
+    return hashlib.sha1(password.encode()).hexdigest()
+
+
+SECURE VERSION --> Uses PBKDF2 with SHA-256 via Werkzeug which adds salt and key stretching to defend
+against brute-force and rainbow table attacks. 
+
+--------------------------------------------------------------------------------------------------------------
+
+Injection
+
+OWASP Guideance: 
+- Use parameterized queries or prepared statements
+- Validate and ssanitize all user inputs
+- Avoid dynamic query construction
+
+
+NUMBER 5 
+
+VULNERABILITY - Concatenates user input directly into SQL Query. 
+
+String username = request.getParameter("username");
+String query = "SELECT * FROM users WHERE username = '" + username + "'";
+Statement stmt = connection.createStatement();
+ResultSet rs = stmt.executeQuery(query);
+
+SECURE VERSION --> Uses PerparedStatement to safely parameterize queries, preventing SQL Injection. 
+
+
+NUMBER 6
+
+VULNERABILITY - Directly uses query parameters in MongoDB query, allowing injections. 
+
+app.get('/user', (req, res) => {
+    // Directly trusting query parameters can lead to NoSQL injection
+    db.collection('users').findOne({ username: req.query.username }, (err, user) => {
+        if (err) throw err;
+        res.json(user);
+    });
+});
+
+SECURE VERSION --> Casts input string and uses authentication middleware preventing NoSQL injection 
+and unauthorized access.
+
+
+--------------------------------------------------------------------------------------------------------------
+
+Insecure Design
+
+OWASP Guideance: 
+- Impletment secure workflows with verification steps
+- Use MFA
+- Avoid relying solely on user-supplied identifiers
+
+
+NUMBER 7 
+
+VULNERABILITY - Allows password reset without verifying user identity or ownership of the email. 
+
+@app.route('/reset-password', methods=['POST'])
+def reset_password():
+    email = request.form['email']
+    new_password = request.form['new_password']
+    user = User.query.filter_by(email=email).first()
+    user.password = new_password
+    db.session.commit()
+    return 'Password reset'
+
+SECURE VERSION --> Adds token verification and password hashing to ensure only authorized users can
+reset passwords securely. 
+
+
+--------------------------------------------------------------------------------------------------------------
+
+Software and Data Integerity Failures 
+
+OWASP Guideance: 
+- DUse subresource Integrity SRI
+- Prefer self-hosted libraries
+- Monitor and validate dependencies
+
+
+NUMBER 8 
+
+VULNERABILITY - Loads script from external CDN without integrity check. If compromised, malicious code
+can be injected. 
+
+<script src="https://cdn.example.com/lib.js"></script>
+
+SECURE VERSION --> Adds Subresource Integrity (SRI) to verify the script hasnt been tampered with. 
+ 
+
+--------------------------------------------------------------------------------------------------------------
+
+Server-Side Request Forgery
+
+OWASP Guideance: 
+- Validate and whitelist URLs
+- Block Internal IP ranges
+- Use Network segmentation and firewalls 
+
+
+NUMBER 9 
+
+VULNERABILITY - Accepts arbitrary URLs from user input and fetches them allowing SSRF attacks. 
+
+url = input("Enter URL: ")
+response = requests.get(url)
+print(response.text)
+
+SECURE VERSION --> Validates the hostname to restrict requests to trusted domains, therefore prevents SSRF 
+exploitation. 
+
+--------------------------------------------------------------------------------------------------------------
+
+Identification and Authentication Failures
+
+OWASP Guideance: 
+- Hash passwords using adaptive algorithms
+- Implement secure authentication flows
+- Enforce strong password policies
+
+
+NUMBER 10
+
+VULNERABILITY - Compares plaintext password with stored password which is most likely also in plaintext. 
+
+if (inputPassword.equals(user.getPassword())) { 
+    // Login success
+}
+
+SECURE VERSION --> Uses BCrypt to hash and verify passwords securely which prevents credential theft
+
+
+

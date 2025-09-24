@@ -1,0 +1,158 @@
+OWASP Top Ten Code Fix
+Samantha Harper
+09/24/2025
+
+This script will show 10 SECURELY fixed scripts of the OWASP top 10 faulty scripts provided. 
+All vulnerable Scrips can be reviewed with further explanation of their vulnerabilities 
+and what was improved through the OWASP ReadME. 
+
+--------------------------------------------------------------------------------------------------------------
+
+Broken Access Control
+NUMBER 1 
+
+Secure Version --> This version adds in authenticateUser middleware and checks if the authenticated users 
+ID matchs the requested profile -- preventing unauthorized access.
+
+app.get('/profile/:userId', authenticateUser, (req, res) => {
+    if (req.user.id !== req.params.userId) {
+        return res.status(403).send('Access denied');
+    }
+    User.findById(req.params.userId, (err, user) => {
+        if (err) return res.status(500).send(err);
+        res.json(user);
+    });
+});
+
+--------------------------------------------------------------------------------------------------------------
+
+Broken Access Control
+NUMBER 2
+
+Secure Version --> Uses login_required and checks the the current_user matches the requested user)id.. this prevents horizontal privilege escalation.
+
+@app.route('/account/<user_id>')
+@login_required
+def get_account(user_id):
+    if current_user.id != user_id:
+        return jsonify({'error': 'Access denied'}), 403
+    user = db.query(User).filter_by(id=user_id).first()
+    return jsonify(user.to_dict())
+
+--------------------------------------------------------------------------------------------------------------
+
+Cryptographic Failures
+NUMBER 3
+
+SECURE VERSION --> Replaces MDS with BCrypt a modern password hashing algroithim that includes salting
+and is resistant to brute-force attacks. 
+
+public String hashPassword(String password) {
+    return BCrypt.hashpw(password, BCrypt.gensalt());
+}
+
+--------------------------------------------------------------------------------------------------------------
+
+Cryptographic Failures
+NUMBER 4
+
+SECURE VERSION --> Uses PBKDF2 with SHA-256 via Werkzeug which adds salt and key stretching to defend
+against brute-force and rainbow table attacks. 
+
+from werkzeug.security import generate_password_hash
+
+def hash_password(password):
+    return generate_password_hash(password, method='pbkdf2:sha256')
+
+
+--------------------------------------------------------------------------------------------------------------
+
+Injection
+NUMBER 5 
+
+SECURE VERSION --> Uses PerparedStatement to safely parameterize queries, preventing SQL Injection. 
+
+String username = request.getParameter("username");
+PreparedStatement stmt = connection.prepareStatement("SELECT * FROM users WHERE username = ?");
+stmt.setString(1, username);
+ResultSet rs = stmt.executeQuery();
+
+--------------------------------------------------------------------------------------------------------------
+
+Injection
+NUMBER 6
+
+SECURE VERSION --> Casts input string and uses authentication middleware preventing NoSQL injection 
+and unauthorized access.
+
+app.get('/user', authenticateUser, (req, res) => {
+    const username = String(req.query.username);
+    db.collection('users').findOne({ username }, (err, user) => {
+        if (err) throw err;
+        res.json(user);
+    });
+});
+
+--------------------------------------------------------------------------------------------------------------
+
+Insecure Design
+NUMBER 7 
+
+SECURE VERSION --> Adds token verification and password hashing to ensure only authorized users can
+reset passwords securely. 
+
+@app.route('/reset-password', methods=['POST'])
+def reset_password():
+    email = request.form['email']
+    new_password = request.form['new_password']
+    token = request.form['token']
+    user = User.query.filter_by(email=email).first()
+    if not verify_token(user, token):
+        return 'Invalid token', 403
+    user.password = hash_password(new_password)
+    db.session.commit()
+    return 'Password reset'
+
+--------------------------------------------------------------------------------------------------------------
+
+Software and Data Integerity Failures 
+NUMBER 8 
+
+SECURE VERSION --> Adds Subresource Integrity (SRI) to verify the script hasnt been tampered with. 
+
+<script src="https://cdn.example.com/lib.js"
+        integrity="sha384-abc123..."
+        crossorigin="anonymous"></script>
+
+--------------------------------------------------------------------------------------------------------------
+
+Server-Side Request Forgery
+NUMBER 9 
+
+SECURE VERSION --> Validates the hostname to restrict requests to trusted domains, therefore prevents SSRF 
+exploitation. 
+
+from urllib.parse import urlparse
+
+def is_safe_url(url):
+    parsed = urlparse(url)
+    return parsed.hostname in ['example.com']
+
+url = input("Enter URL: ")
+if not is_safe_url(url):
+    print("Unsafe URL")
+else:
+    response = requests.get(url)
+    print(response.text)
+
+--------------------------------------------------------------------------------------------------------------
+
+Identification and Authentication Failures
+NUMBER 10
+
+SECURE VERSION --> Uses BCrypt to hash and verify passwords securely which prevents credential theft
+
+if (BCrypt.checkpw(inputPassword, user.getHashedPassword())) {
+    // Login success
+}
+
